@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VILNIUS CONCEPT | Luxury Boutique</title>
+    <!-- Tailwind CSS v3 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --noir: #0a0a0a;
+            --charcoal: #1a1a1a;
+            --cream: #f5f5f0;
+            --gold: #c5a059;
+        }
+
+        body {
+            background-color: var(--noir);
+            color: var(--cream);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-serif { font-family: 'Cormorant+Garamond', serif; }
+
+        .parallax-bg {
+            background-attachment: scroll;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        @media (min-width: 768px) {
+            .parallax-bg {
+                background-attachment: fixed;
+            }
+        }
+
+        .selection-gold::selection {
+            background: var(--gold);
+            color: var(--noir);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--noir); }
+        ::-webkit-scrollbar-thumb { background: rgba(197, 160, 89, 0.3); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(197, 160, 89, 0.5); }
+
+        /* Animations */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Cart Sidebar */
+        #cart-sidebar {
+            transform: translateX(100%);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #cart-sidebar.open {
+            transform: translateX(0);
+        }
+
+        .cart-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .cart-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .product-parallax-img {
+            transform: translateY(var(--parallax-y, 0)) scale(1.05);
+            transition: transform 0.5s cubic-bezier(0.2, 0, 0.2, 1);
+        }
+
+        .group:hover .product-parallax-img {
+            transform: translateY(var(--parallax-y, 0)) scale(1.15) !important;
+        }
+
+        /* Cart Item Animations */
+        .cart-item {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .cart-item.entering {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+
+        .cart-item.exiting {
+            opacity: 0;
+            transform: translateX(50px);
+            height: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            overflow: hidden;
+        }
+
+        .cart-item.new-item {
+            animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulse-gold {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); background-color: rgba(197, 160, 89, 0.2); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse-gold 0.4s ease-out;
+        }
+
+        .product-card {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -20px rgba(197, 160, 89, 0.3);
+        }
+
+        /* Product Image Parallax */
+        @media (min-width: 1024px) {
+            .product-image-container {
+                overflow: hidden;
+            }
+            .product-parallax-img {
+                height: 120%;
+                width: 100%;
+                object-fit: cover;
+                transform: translateY(-5%);
+                transition: transform 0.1s ease-out;
+                will-change: transform;
+            }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 2px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(197, 160, 89, 0.05);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(197, 160, 89, 0.3);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(197, 160, 89, 0.6);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        .toast-notification {
+            animation: fadeUp 0.5s ease-out forwards;
+        }
+
+        /* Confirm Removal Overlay */
+        .remove-confirm {
+            position: absolute;
+            inset: 0;
+            background: rgba(26, 26, 26, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .remove-confirm.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="selection-gold">
+
+    <!-- Navigation -->
+    <nav id="main-nav" class="fixed top-0 left-0 w-full z-40 transition-all duration-500 px-4 md:px-12 py-6 flex justify-between items-center">
+        <div class="flex items-center gap-4 md:gap-8">
+            <i data-lucide="menu" role="button" aria-label="Open menu" class="cursor-pointer hover:text-[#c5a059] transition-colors w-5 h-5 md:w-6 md:h-6"></i>
+            <div class="hidden lg:flex gap-6 text-[10px] uppercase tracking-[0.3em]">
+                <a href="#" class="hover:text-[#c5a059] transition-colors">Collections</a>
+                <a href="#" class="hover:text-[#c5a059] transition-colors">Boutique</a>
+                <a href="#" class="hover:text-[#c5a059] transition-colors">About</a>
+            </div>
+        </div>
+        
+        <h1 class="text-lg md:text-2xl font-serif tracking-[0.2em] absolute left-1/2 -translate-x-1/2 cursor-pointer whitespace-nowrap">
+            VILNIUS CONCEPT
+        </h1>
+
+        <div class="flex items-center gap-4 md:gap-6">
+            <div class="hidden lg:flex gap-6 text-[10px] uppercase tracking-[0.3em]">
+                <a href="#" class="hover:text-[#c5a059] transition-colors">Search</a>
+                <a href="#" class="hover:text-[#c5a059] transition-colors">Account</a>
+            </div>
+            <div class="relative cursor-pointer hover:text-[#c5a059] transition-colors" id="cart-trigger" role="button" aria-label="Open shopping bag" aria-expanded="false" aria-controls="cart-sidebar">
+                <i data-lucide="shopping-bag" class="w-5 h-5 md:w-6 md:h-6"></i>
+                <span id="cart-badge" class="absolute -top-1 -right-1 bg-[#c5a059] text-[#0a0a0a] text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative h-screen overflow-hidden flex items-center justify-center">
+        <div class="absolute inset-0 z-0 parallax-bg" style="background-image: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop'); filter: brightness(0.4);"></div>
+        <div class="relative z-10 text-center px-4 max-w-5xl">
+            <span class="text-[#c5a059] uppercase tracking-[0.5em] text-xs md:text-sm mb-6 block fade-up">Est. 2024 • Vilnius, Lithuania</span>
+            <h2 class="text-5xl md:text-9xl font-serif mb-8 leading-tight fade-up" style="transition-delay: 0.2s;">Modern <br> <span class="italic">Noir</span></h2>
+            <div class="fade-up" style="transition-delay: 0.4s;">
+                <button aria-label="Discover our collection" class="group relative px-12 py-4 border border-[#c5a059]/30 hover:border-[#c5a059] transition-all duration-500 overflow-hidden">
+                    <span class="relative z-10 text-[10px] uppercase tracking-[0.4em] group-hover:text-[#0a0a0a] transition-colors duration-500">Discover Collection</span>
+                    <div class="absolute inset-0 bg-[#c5a059] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+                </button>
+            </div>
+        </div>
+        <div class="absolute bottom-12 left-1/2 -translate-x-1/2 text-[#c5a059]/50 animate-bounce">
+            <div class="w-[1px] h-16 bg-gradient-to-b from-[#c5a059]/50 to-transparent mx-auto"></div>
+        </div>
+    </header>
+
+    <!-- Intro Section -->
+    <section class="py-24 md:py-32 px-6 md:px-12 max-w-7xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
+            <div class="fade-up">
+                <div class="relative aspect-[3/4] overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?q=80&w=1000&auto=format&fit=crop" alt="Editorial" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000" referrerpolicy="no-referrer">
+                    <div class="absolute -bottom-8 -right-8 w-48 h-48 border border-[#c5a059]/20 hidden md:block"></div>
+                </div>
+            </div>
+            
+            <div class="space-y-6 md:space-y-8 fade-up" style="transition-delay: 0.2s;">
+                <span class="text-[#c5a059] uppercase tracking-[0.3em] text-xs">Our Philosophy</span>
+                <h3 class="text-3xl md:text-6xl font-serif leading-tight">Curating Silence in a <span class="italic">Loud World</span></h3>
+                <p class="text-[#f5f5f0]/60 text-base md:text-lg leading-relaxed max-w-md">
+                    Vilnius Concept is a dialogue between traditional craftsmanship and contemporary minimalism. We believe in the power of the understated, the beauty of the raw, and the luxury of the essential.
+                </p>
+                <a href="#" class="inline-flex items-center gap-4 text-[#c5a059] uppercase tracking-[0.3em] text-xs group">
+                    Read our story <i data-lucide="arrow-right" class="group-hover:translate-x-2 transition-transform w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter System -->
+    <section class="pt-32 pb-16 px-6 md:px-12 max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 fade-up">
+            <div>
+                <span class="text-[#c5a059] uppercase tracking-[0.3em] text-xs mb-4 block">Shop by category</span>
+                <h3 class="text-5xl font-serif">The Core Series</h3>
+            </div>
+            <div class="flex flex-wrap gap-4 md:gap-8 text-[10px] uppercase tracking-[0.3em] text-[#c5a059]/50" id="filter-buttons">
+                <button class="filter-btn text-[#c5a059] border-b border-[#c5a059] pb-1" data-filter="all" aria-pressed="true">All</button>
+                <button class="filter-btn hover:text-[#c5a059] transition-colors" data-filter="new" aria-pressed="false">New Arrivals</button>
+                <button class="filter-btn hover:text-[#c5a059] transition-colors" data-filter="Outerwear" aria-pressed="false">Outerwear</button>
+                <button class="filter-btn hover:text-[#c5a059] transition-colors" data-filter="Dresses" aria-pressed="false">Dresses</button>
+                <button class="filter-btn hover:text-[#c5a059] transition-colors" data-filter="Knitwear" aria-pressed="false">Knitwear</button>
+                <button class="filter-btn hover:text-[#c5a059] transition-colors" data-filter="Trousers" aria-pressed="false">Trousers</button>
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" id="product-grid">
+            <!-- Products will be injected here by JS -->
+        </div>
+    </section>
+
+    <!-- Editorial Quote -->
+    <section class="py-48 px-6 text-center bg-[#1a1a1a]/30">
+        <div class="max-w-3xl mx-auto fade-up">
+            <h3 class="text-4xl md:text-6xl font-serif italic leading-tight mb-12">
+                "Luxury is not about being noticed, it's about being remembered."
+            </h3>
+            <div class="w-12 h-[1px] bg-[#c5a059] mx-auto mb-8"></div>
+            <p class="text-[#c5a059] uppercase tracking-[0.4em] text-xs">Vilnius Concept Manifesto</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#0a0a0a] border-t border-[#c5a059]/10 pt-24 pb-12 px-6 md:px-12">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-16 mb-24">
+                <div class="col-span-1 md:col-span-2">
+                    <h2 class="text-3xl font-serif tracking-[0.2em] mb-8">VILNIUS CONCEPT</h2>
+                    <p class="text-[#f5f5f0]/40 max-w-sm mb-8">Subscribe for exclusive access to new collections and private events in Vilnius.</p>
+                    <div class="flex max-w-md">
+                        <input type="email" placeholder="EMAIL ADDRESS" class="bg-transparent border-b border-[#c5a059]/30 py-3 w-full focus:outline-none focus:border-[#c5a059] transition-colors text-xs tracking-widest">
+                        <button class="border-b border-[#c5a059]/30 px-4 hover:text-[#c5a059] transition-colors"><i data-lucide="arrow-right"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-[10px] uppercase tracking-[0.3em] text-[#c5a059] mb-8">Navigation</h4>
+                    <ul class="space-y-4 text-xs tracking-widest text-[#f5f5f0]/60">
+                        <li><a href="#" class="hover:text-[#c5a059] transition-colors">Collections</a></li>
+                        <li><a href="#" class="hover:text-[#c5a059] transition-colors">Boutique</a></li>
+                        <li><a href="#" class="hover:text-[#c5a059] transition-colors">Archive</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-[10px] uppercase tracking-[0.3em] text-[#c5a059] mb-8">Concierge</h4>
+                    <ul class="space-y-4 text-xs tracking-widest text-[#f5f5f0]/60">
+                        <li><a href="#" class="hover:text-[#c5a059] transition-colors">Shipping</a></li>
+                        <li><a href="#" class="hover:text-[#c5a059] transition-colors">Returns</a></li>
+                        <li><a href="#" class="hover:text-[#c5a059] transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-[#c5a059]/5 gap-8">
+                <div class="flex gap-8">
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram" class="text-[#c5a059]/50 hover:text-[#c5a059] transition-colors">
+                        <i data-lucide="instagram" class="w-5 h-5"></i>
+                    </a>
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Facebook" class="text-[#c5a059]/50 hover:text-[#c5a059] transition-colors">
+                        <i data-lucide="facebook" class="w-5 h-5"></i>
+                    </a>
+                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Twitter" class="text-[#c5a059]/50 hover:text-[#c5a059] transition-colors">
+                        <i data-lucide="twitter" class="w-5 h-5"></i>
+                    </a>
+                </div>
+                <p class="text-[10px] uppercase tracking-[0.3em] text-[#c5a059]/30">© 2024 VILNIUS CONCEPT • ALL RIGHTS RESERVED</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-overlay" class="cart-overlay fixed inset-0 bg-black/60 z-50"></div>
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-[#1a1a1a] z-[60] p-6 md:p-8 flex flex-col border-l border-[#c5a059]/20" aria-labelledby="cart-title">
+        <div class="flex justify-between items-center mb-8 md:mb-12">
+            <h3 id="cart-title" class="text-xl md:text-2xl font-serif tracking-widest uppercase">Your Bag</h3>
+            <button id="cart-close" aria-label="Close shopping bag" class="p-2 hover:text-[#c5a059] transition-colors"><i data-lucide="x"></i></button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+            <div id="cart-items" class="space-y-6">
+                <!-- Cart items will be injected here -->
+            </div>
+            <p id="empty-cart-msg" class="text-center text-[#f5f5f0]/40 italic py-20">Your bag is currently empty.</p>
+        </div>
+
+        <div class="pt-6 border-t border-[#c5a059]/20 mt-auto">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-[10px] uppercase tracking-[0.3em] text-[#c5a059]">Total</span>
+                <span id="cart-total" class="text-xl md:text-2xl font-serif">€0</span>
+            </div>
+            <button aria-label="Proceed to checkout" class="w-full py-3.5 bg-[#c5a059] text-[#0a0a0a] font-bold uppercase tracking-[0.5em] text-[9px] hover:bg-[#f5f5f0] transition-colors shadow-lg">Checkout</button>
+        </div>
+    </div>
+
+    <!-- Quick View Modal -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/90 z-[70] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div id="modal-content" class="bg-[#1a1a1a] max-w-4xl w-full overflow-hidden flex flex-col md:flex-row relative border border-[#c5a059]/20">
+            <!-- Modal content injected here -->
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const PRODUCTS = [
+            { id: 1, name: "The Noir Overcoat", price: 1250, category: "Outerwear", image: "https://images.unsplash.com/photo-1591047139829-d91aec16adcd?q=80&w=1000&auto=format&fit=crop", isNew: true },
+            { id: 2, name: "Silk Evening Gown", price: 2100, category: "Dresses", image: "https://images.unsplash.com/photo-1539008835657-9e8e9680fe0a?q=80&w=1000&auto=format&fit=crop" },
+            { id: 3, name: "Cashmere Turtleneck", price: 450, category: "Knitwear", image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=1000&auto=format&fit=crop", isNew: true },
+            { id: 4, name: "Tailored Wool Trousers", price: 680, category: "Trousers", image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1000&auto=format&fit=crop" },
+            { id: 5, name: "Velvet Blazer", price: 890, category: "Outerwear", image: "https://images.unsplash.com/photo-1591369822096-ffd140ec948f?q=80&w=1000&auto=format&fit=crop", isNew: true },
+            { id: 6, name: "Minimalist Slip Dress", price: 520, category: "Dresses", image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=1000&auto=format&fit=crop" }
+        ];
+
+        // State
+        let cart = [];
+        try {
+            const savedCart = localStorage.getItem('vilnius_cart');
+            if (savedCart) {
+                const parsed = JSON.parse(savedCart);
+                if (Array.isArray(parsed)) {
+                    // Validate each item to ensure data integrity
+                    cart = parsed.filter(item => 
+                        item && 
+                        typeof item.id === 'number' && 
+                        typeof item.price === 'number' && 
+                        typeof item.quantity === 'number' &&
+                        item.name
+                    );
+                }
+            }
+        } catch (e) {
+            console.error('Failed to load cart from localStorage:', e);
+            cart = [];
+        }
+        let lastAddedId = null;
+
+        // DOM Elements
+        const productGrid = document.getElementById('product-grid');
+        const cartSidebar = document.getElementById('cart-sidebar');
+        const cartOverlay = document.getElementById('cart-overlay');
+        const cartTrigger = document.getElementById('cart-trigger');
+        const cartClose = document.getElementById('cart-close');
+        const cartItemsContainer = document.getElementById('cart-items');
+        const cartTotalEl = document.getElementById('cart-total');
+        const cartBadge = document.getElementById('cart-badge');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const mainNav = document.getElementById('main-nav');
+        const modalOverlay = document.getElementById('modal-overlay');
+
+        // Initialize
+        function init() {
+            renderProducts(PRODUCTS);
+            updateCartUI();
+            lucide.createIcons();
+            setupIntersectionObserver();
+        }
+
+        // Render Products
+        function renderProducts(items) {
+            productGrid.innerHTML = items.map(product => `
+                <div class="product-card fade-up group" data-category="${product.category}">
+                    <div class="relative aspect-[3/4] overflow-hidden bg-[#0a0a0a] mb-6 product-image-container">
+                        ${product.isNew ? `
+                            <div class="absolute top-4 left-4 z-20 bg-[#c5a059] text-[#0a0a0a] text-[8px] uppercase tracking-[0.3em] font-bold px-3 py-1">
+                                New
+                            </div>
+                        ` : ''}
+                        <img src="${product.image}" 
+                             alt="${product.name}" 
+                             class="w-full h-full object-cover product-parallax-img" 
+                             referrerpolicy="no-referrer">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col items-center justify-center gap-4">
+                            <button onclick="openQuickView(${product.id})" aria-label="Quick view for ${product.name}" class="px-8 py-3 bg-[#f5f5f0] text-[#0a0a0a] text-[10px] uppercase tracking-[0.2em] font-medium hover:bg-[#c5a059] transition-colors w-40">Quick View</button>
+                            <button onclick="addToCart(${product.id})" aria-label="Add ${product.name} to bag" class="px-8 py-3 bg-[#c5a059] text-[#0a0a0a] text-[10px] uppercase tracking-[0.2em] font-medium hover:bg-[#f5f5f0] transition-colors w-40">Add to Bag</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.2em] text-[#c5a059]/60 mb-1">${product.category}</p>
+                            <h4 class="text-lg font-serif group-hover:text-[#c5a059] transition-colors">${product.name}</h4>
+                        </div>
+                        <p class="text-sm text-[#c5a059]/80">€${product.price}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Re-observe new elements
+            setupIntersectionObserver();
+            lucide.createIcons();
+        }
+
+        // Filter Logic
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const filter = btn.getAttribute('data-filter');
+                
+                // Update active state
+                filterButtons.forEach(b => {
+                    b.classList.remove('text-[#c5a059]', 'border-b', 'border-[#c5a059]', 'pb-1');
+                    b.setAttribute('aria-pressed', 'false');
+                });
+                btn.classList.add('text-[#c5a059]', 'border-b', 'border-[#c5a059]', 'pb-1');
+                btn.setAttribute('aria-pressed', 'true');
+
+                let filtered;
+                if (filter === 'all') {
+                    filtered = PRODUCTS;
+                } else if (filter === 'new') {
+                    filtered = PRODUCTS.filter(p => p.isNew);
+                } else {
+                    filtered = PRODUCTS.filter(p => p.category === filter);
+                }
+                
+                // Animate out then in
+                productGrid.style.opacity = '0';
+                setTimeout(() => {
+                    renderProducts(filtered);
+                    productGrid.style.opacity = '1';
+                }, 300);
+            });
+        });
+
+        // Cart Logic
+        window.addToCart = function(id) {
+            const product = PRODUCTS.find(p => p.id === id);
+            if (!product) {
+                console.error(`Product with ID ${id} not found`);
+                return;
+            }
+
+            const existing = cart.find(item => item.id === id);
+            
+            lastAddedId = id;
+
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            
+            saveCart();
+            updateCartUI();
+            openCart();
+            showToast(`${product.name} added to bag`);
+        };
+
+        window.removeFromCart = function(id) {
+            const itemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
+            if (!itemEl) return;
+            
+            const confirmOverlay = itemEl.querySelector('.remove-confirm');
+            if (confirmOverlay) confirmOverlay.classList.add('active');
+        };
+
+        window.cancelRemove = function(id) {
+            const itemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
+            if (!itemEl) return;
+
+            const confirmOverlay = itemEl.querySelector('.remove-confirm');
+            if (confirmOverlay) confirmOverlay.classList.remove('active');
+        };
+
+        window.executeRemove = function(id) {
+            const itemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
+            if (itemEl) itemEl.classList.add('exiting');
+            
+            setTimeout(() => {
+                const product = cart.find(item => item.id === id);
+                cart = cart.filter(item => item.id !== id);
+                saveCart();
+                updateCartUI();
+                if (product) showToast(`${product.name} removed`);
+            }, 400);
+        };
+
+        window.updateQuantity = function(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.quantity += delta;
+                if (item.quantity < 1) {
+                    removeFromCart(id);
+                } else {
+                    lastAddedId = id; // Trigger pulse
+                    saveCart();
+                    updateCartUI();
+                }
+            }
+        };
+
+        function showToast(message) {
+            const existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#c5a059] text-[#0a0a0a] px-8 py-3 text-[10px] uppercase tracking-[0.4em] font-bold z-[100] shadow-2xl border border-[#0a0a0a]/10';
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, 20px)';
+                toast.style.transition = 'all 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }, 2500);
+        }
+
+        function saveCart() {
+            try {
+                localStorage.setItem('vilnius_cart', JSON.stringify(cart));
+            } catch (e) {
+                console.error('Failed to save cart to localStorage:', e);
+                // If storage is full, we might want to notify the user or just fail silently
+                if (e.name === 'QuotaExceededError') {
+                    showToast('Storage full: Cart might not be saved');
+                }
+            }
+        }
+
+        function updateCartUI() {
+            // Ensure cart is an array before processing
+            if (!Array.isArray(cart)) {
+                cart = [];
+            }
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+            if (cartTotalEl) cartTotalEl.innerText = `€${total.toLocaleString()}`;
+            
+            const emptyMsg = document.getElementById('empty-cart-msg');
+            if (count > 0) {
+                if (cartBadge) {
+                    cartBadge.innerText = count;
+                    cartBadge.classList.remove('hidden');
+                }
+                if (emptyMsg) emptyMsg.classList.add('hidden');
+            } else {
+                if (cartBadge) cartBadge.classList.add('hidden');
+                if (emptyMsg) emptyMsg.classList.remove('hidden');
+            }
+
+            if (cartItemsContainer) {
+                cartItemsContainer.innerHTML = cart.map(item => `
+                <div class="cart-item flex gap-6 group relative py-4 border-b border-[#c5a059]/5 ${lastAddedId === item.id ? 'new-item' : ''}" data-id="${item.id}">
+                    <!-- Removal Confirmation -->
+                    <div class="remove-confirm">
+                        <span class="text-[10px] uppercase tracking-widest text-[#c5a059]/60">Remove item?</span>
+                        <div class="flex gap-4">
+                            <button onclick="executeRemove(${item.id})" aria-label="Confirm removal of ${item.name}" class="text-[10px] uppercase tracking-widest text-[#c5a059] hover:text-[#f5f5f0]">Yes</button>
+                            <button onclick="cancelRemove(${item.id})" aria-label="Cancel removal of ${item.name}" class="text-[10px] uppercase tracking-widest text-[#f5f5f0]/40 hover:text-[#f5f5f0]">No</button>
+                        </div>
+                    </div>
+
+                    <div class="w-24 h-32 overflow-hidden bg-[#0a0a0a] flex-shrink-0">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover" referrerpolicy="no-referrer">
+                    </div>
+                    <div class="flex-1 flex flex-col justify-center">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-serif text-lg">${item.name}</h4>
+                            <button onclick="removeFromCart(${item.id})" aria-label="Remove ${item.name} from bag" class="text-[#c5a059]/40 hover:text-[#c5a059] transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="flex items-center border border-[#c5a059]/20">
+                                <button onclick="updateQuantity(${item.id}, -1)" aria-label="Decrease quantity" class="px-3 py-1 hover:bg-[#c5a059] hover:text-[#0a0a0a] transition-colors text-xs">-</button>
+                                <span class="px-3 text-xs font-medium min-w-[24px] text-center ${lastAddedId === item.id ? 'pulse' : ''}">${item.quantity}</span>
+                                <button onclick="updateQuantity(${item.id}, 1)" aria-label="Increase quantity" class="px-3 py-1 hover:bg-[#c5a059] hover:text-[#0a0a0a] transition-colors text-xs">+</button>
+                            </div>
+                        </div>
+
+                        <p class="text-sm text-[#c5a059]">€${(item.price * item.quantity).toLocaleString()}</p>
+                    </div>
+                </div>
+            `).join('');
+            }
+            
+            // Reset lastAddedId after a short delay to allow animation to play
+            setTimeout(() => { lastAddedId = null; }, 1000);
+            
+            lucide.createIcons();
+        }
+
+        function openCart() {
+            cartSidebar.classList.add('open');
+            cartOverlay.classList.add('open');
+            cartTrigger.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCart() {
+            cartSidebar.classList.remove('open');
+            cartOverlay.classList.remove('open');
+            cartTrigger.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = 'auto';
+        }
+
+        cartTrigger.addEventListener('click', openCart);
+        cartClose.addEventListener('click', closeCart);
+        cartOverlay.addEventListener('click', closeCart);
+
+        // Quick View Logic
+        window.openQuickView = function(id) {
+            const product = PRODUCTS.find(p => p.id === id);
+            const modalContent = document.getElementById('modal-content');
+            
+            modalContent.innerHTML = `
+                <button onclick="closeModal()" aria-label="Close modal" class="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-[#c5a059] hover:text-[#0a0a0a] transition-colors rounded-full">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                <div class="w-full md:w-1/2 h-64 md:h-auto">
+                    <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover" referrerpolicy="no-referrer">
+                </div>
+                <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                    <span class="text-[#c5a059] uppercase tracking-[0.3em] text-xs mb-4">${product.category}</span>
+                    <h2 class="text-4xl font-serif mb-4">${product.name}</h2>
+                    <p class="text-2xl text-[#c5a059]/80 mb-8">€${product.price}</p>
+                    <div class="space-y-6 mb-12">
+                        <h3 class="text-sm uppercase tracking-widest border-b border-[#c5a059]/20 pb-2">Technical Specs</h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div><p class="text-[#c5a059]/50 uppercase text-[10px] tracking-tighter mb-1">Fabric</p><p>100% Organic Cotton</p></div>
+                            <div><p class="text-[#c5a059]/50 uppercase text-[10px] tracking-tighter mb-1">Weight</p><p>240 GSM</p></div>
+                            <div><p class="text-[#c5a059]/50 uppercase text-[10px] tracking-tighter mb-1">Origin</p><p>Italy</p></div>
+                            <div><p class="text-[#c5a059]/50 uppercase text-[10px] tracking-tighter mb-1">Care</p><p>Dry Clean Only</p></div>
+                        </div>
+                    </div>
+                    <button onclick="addToCart(${product.id}); closeModal();" aria-label="Add ${product.name} to bag" class="w-full py-4 bg-[#c5a059] text-[#0a0a0a] font-medium uppercase tracking-widest hover:bg-[#f5f5f0] transition-colors flex items-center justify-center gap-2">
+                        Add to Bag <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+            
+            modalOverlay.classList.remove('hidden');
+            modalOverlay.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        };
+
+        window.closeModal = function() {
+            modalOverlay.classList.add('hidden');
+            modalOverlay.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        };
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        // Scroll Effects
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                mainNav.classList.add('bg-[#0a0a0a]/80', 'backdrop-blur-md', 'py-4', 'border-b', 'border-[#c5a059]/10');
+            } else {
+                mainNav.classList.remove('bg-[#0a0a0a]/80', 'backdrop-blur-md', 'py-4', 'border-b', 'border-[#c5a059]/10');
+            }
+
+            // Product Parallax
+            if (window.innerWidth >= 1024) {
+                const images = document.querySelectorAll('.product-parallax-img');
+                images.forEach(img => {
+                    const rect = img.parentElement.getBoundingClientRect();
+                    const windowHeight = window.innerHeight;
+                    if (rect.top < windowHeight && rect.bottom > 0) {
+                        const scrollPercent = (windowHeight - rect.top) / (windowHeight + rect.height);
+                        const move = (scrollPercent * 10) - 5; // Move from -5% to 5%
+                        // Use a CSS variable for parallax to avoid overwriting the hover scale
+                        img.style.setProperty('--parallax-y', `${move}%`);
+                    }
+                });
+            }
+        });
+
+        function setupIntersectionObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.fade-up:not(.visible)').forEach(el => observer.observe(el));
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
+
